@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MITTENDRIN! — DENTRO DA FESTA! | CLAC UFRJ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Fundo customizado com temática da bandeira da Alemanha e o mapa dos estados alemães */
+        .german-bg {
+            background-color: #0f172a;
+            background-image: 
+                linear-gradient(rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.92)),
+                url('https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Map_of_German_federal_states%2C_coloured.svg/800px-Map_of_German_federal_states%2C_coloured.svg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .text-flag-gold { color: #ffcc00; }
+        .border-flag-gold { border-color: #ffcc00; }
+    </style>
+</head>
+<body class="german-bg text-slate-100 min-h-screen flex flex-col items-center justify-between p-4 selection:bg-red-600 selection:text-white">
+
+    <!-- Container Principal -->
+    <div class="w-full max-w-2xl bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-2xl p-6 md:p-8 border border-slate-700/80 my-auto">
+        
+        <!-- TELA 1: Boas-vindas e Identificação -->
+        <div id="screen-welcome" class="space-y-6">
+            <div class="text-center space-y-3">
+                <div class="inline-flex items-center gap-1.5 bg-red-600/20 text-red-400 text-xs font-bold px-3.5 py-1 rounded-full border border-red-500/30 uppercase tracking-widest">
+                    <span>🇩🇪</span> DEUTSCH III - CLAC UFRJ
+                </div>
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-white uppercase drop-shadow-md">
+                    MITTENDRIN! <span class="text-flag-gold block text-xl md:text-2xl mt-1 font-semibold">— DENTRO DA FESTA!</span>
+                </h1>
+                <p class="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto">
+                    Festas e Eventos Germânicos no Brasil<br>
+                    <span class="text-xs text-slate-400">Professora: Sarah Braga | Perguntas por: João Paulo Rodrigues</span>
+                </p>
+            </div>
+
+            <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700 text-xs text-slate-300 text-center">
+                ✨ <strong>Desafio Rápido:</strong> 10 perguntas aleatórias sorteadas entre as 58 questões do Mapa de Festas Germânicas!
+            </div>
+
+            <div class="space-y-4 pt-2">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Seu Nome Completo ou Apelido:</label>
+                    <input type="text" id="user-name" placeholder="Ex: Hans Gruber" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-400 transition">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Você é:</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button type="button" onclick="setProfile('Aluno CLAC')" id="btn-clac" class="profile-btn border border-slate-700 bg-slate-900/50 hover:bg-slate-800 py-3 rounded-xl font-medium transition text-center">Aluno do CLAC</button>
+                        <button type="button" onclick="setProfile('Visitante')" id="btn-visitor" class="profile-btn border border-slate-700 bg-slate-900/50 hover:bg-slate-800 py-3 rounded-xl font-medium transition text-center">Visitante</button>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex gap-3">
+                    <button onclick="startQuiz()" class="flex-1 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-amber-600/10 uppercase tracking-wide">Iniciar Quiz</button>
+                    <button onclick="showRanking()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-6 py-3.5 rounded-xl transition border border-slate-700">Ver Ranking</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 2: O Quiz -->
+        <div id="screen-quiz" class="hidden space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <span id="question-counter" class="text-xs font-bold uppercase tracking-wider text-flag-gold">Pergunta 1 de 10</span>
+                <span class="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-300 border border-slate-700">Acertos: <strong id="current-score" class="text-white">0</strong></span>
+            </div>
+
+            <div class="space-y-2">
+                <span id="question-category" class="inline-block text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded bg-red-950 text-red-300 border border-red-800/50">Categoria</span>
+                <h2 id="question-text" class="text-lg md:text-xl font-bold text-white leading-snug">Carregando pergunta...</h2>
+            </div>
+
+            <div id="options-container" class="space-y-3">
+                <!-- Alternativas injetadas via JS -->
+            </div>
+
+            <div class="flex justify-between items-center pt-2">
+                <div id="explanation-box" class="text-xs text-slate-400 italic hidden"></div>
+                <button id="next-btn" onclick="nextQuestion()" class="hidden ml-auto bg-amber-600 hover:bg-amber-500 text-white font-bold px-6 py-2.5 rounded-xl transition shadow-md">Próxima Pergunta →</button>
+            </div>
+        </div>
+
+        <!-- TELA 3: Resultado Final -->
+        <div id="screen-result" class="hidden text-center space-y-6">
+            <div class="space-y-2">
+                <span class="text-flag-gold font-bold text-sm tracking-wider uppercase">Festa Finalizada! 🍻</span>
+                <h2 class="text-3xl font-bold text-white" id="result-name">Parabéns!</h2>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-6 max-w-sm mx-auto space-y-3 shadow-inner">
+                <p class="text-slate-400 text-sm">Sua pontuação:</p>
+                <div class="text-5xl font-black text-flag-gold" id="result-percentage">0%</div>
+                <p class="text-xs text-slate-400" id="result-details">Você acertou 0 de 10 perguntas.</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+                <button onclick="showRanking()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-6 py-3 rounded-xl transition shadow-md">Ver Ranking Global</button>
+                <button onclick="location.reload()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-6 py-3 rounded-xl transition border border-slate-700">Jogar Novamente</button>
+            </div>
+        </div>
+
+        <!-- TELA 4: Ranking Global -->
+        <div id="screen-ranking" class="hidden space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">🏆 Ranking Global</h2>
+                <button onclick="backToWelcome()" class="text-sm text-slate-400 hover:text-white transition underline">Voltar ao Início</button>
+            </div>
+
+            <div class="overflow-x-auto max-h-96 overflow-y-auto pr-1">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-xs text-slate-400 uppercase tracking-wider">
+                            <th class="py-3 px-3">Pos</th>
+                            <th class="py-3 px-3">Nome</th>
+                            <th class="py-3 px-3">Perfil</th>
+                            <th class="py-3 px-3 text-right">Acertos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-table-body" class="divide-y divide-slate-800/50 text-sm">
+                        <!-- Carregado via Firebase -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Rodapé solicitado -->
+    <footer class="w-full text-center py-4 mt-6 text-xs text-slate-400 border-t border-slate-800/60 bg-slate-950/40 backdrop-blur-sm space-y-1">
+        <p>Desenvolvido por <strong class="text-slate-200">José Hilto Do Nascimento</strong> &bull; Perguntas formuladas por <strong class="text-slate-200">João Paulo Rodrigues</strong></p>
+        <p class="text-[11px] text-slate-300">DEUTSCH III &bull; CLAC UFRJ &bull; Professora Sarah Braga</p>
+    </footer>
+
+    <!-- Script da Aplicação e Firebase (Modular SDK) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Configuração do Firebase atualizada com seu projeto 'login-controle'
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbhRarhTgmXf4pxHONYgvTDOJncsFGBaQ",
+            authDomain: "login-controle.firebaseapp.com",
+            projectId: "login-controle",
+            storageBucket: "login-controle.firebasestorage.app",
+            messagingSenderId: "622502425374",
+            appId: "1:622502425374:web:109c9bd7658da959bc4f0f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Banco completo com as 58 perguntas oficiais
+        const allQuestions = [
+            { cat: "NOMES DE FESTAS", q: "O que significa Oktoberfest?", options: ["Festa de Outubro", "Festa de Páscoa", "Festa de Maio"], answer: 0, exp: "Oktober = outubro; Fest = festa." },
+            { cat: "NOMES DE FESTAS", q: "A Osterfest de Pomerode celebra qual ocasião?", options: ["Natal", "Páscoa", "Ano-Novo"], answer: 1, exp: "Ostern = Páscoa." },
+            { cat: "NOMES DE FESTAS", q: "O que significa Sommer, no nome Sommerfest?", options: ["Inverno", "Outono", "Verão"], answer: 2, exp: "Sommer = verão." },
+            { cat: "NOMES DE FESTAS", q: "Na Bauernfest de Petrópolis, quem são os Bauern?", options: ["Agricultores ou colonos", "Músicos", "Comerciantes"], answer: 0, exp: "Bauern é o plural de Bauer." },
+            { cat: "NOMES DE FESTAS", q: "A Schützenfest de Jaraguá do Sul está ligada a qual tradição?", options: ["Corridas", "Clubes de tiro", "Cinema"], answer: 1, exp: "Schützen = atiradores." },
+            { cat: "NOMES DE FESTAS", q: "Na Heimatfest de Forquilhinha, o que significa Heimat?", options: ["Mercado", "Palco", "Terra natal"], answer: 2, exp: "Heimat = terra natal." },
+            { cat: "NOMES DE FESTAS", q: "O que significa Süd em Südoktoberfest?", options: ["Sul", "Norte", "Leste"], answer: 0, exp: "Süd = sul." },
+            { cat: "NOMES DE FESTAS", q: "A Einwanderungsfest de São Leopoldo celebra o quê?", options: ["O inverno", "A imigração", "O esporte"], answer: 1, exp: "Einwanderung = imigração." },
+            { cat: "NOMES DE FESTAS", q: "A Wurstfest de Afonso Cláudio (ES) tem no nome qual alimento?", options: ["Pão", "Queijo", "Linguiça ou salsicha"], answer: 2, exp: "Wurst = salsicha ou linguiça." },
+            { cat: "NOMES DE FESTAS", q: "A Kegelfest de Rio do Sul está ligada a qual atividade?", options: ["Bolão", "Natação", "Teatro"], answer: 0, exp: "Kegelfest = Festa do Bolão." },
+            { cat: "NOMES DE FESTAS", q: "No nome Maifest / BrooklinFest de São Paulo, Mai indica qual mês?", options: ["Março", "Maio", "Novembro"], answer: 1, exp: "Mai = maio." },
+            { cat: "NOMES DE FESTAS", q: "A Kerbfest de Cunha Porã está associada a qual celebração?", options: ["Colheita de maçãs", "Festival de cinema", "Consagração da igreja"], answer: 2, exp: "Kerb se refere à consagração da igreja." },
+            { cat: "NOMES DE FESTAS", q: "Em Deutsches Fest, Deutsches indica qual cultura?", options: ["Alemã", "Italiana", "Suíça francesa"], answer: 0, exp: "Deutsch = alemão." },
+            { cat: "NOMES DE FESTAS", q: "A Tirolerfest de Treze Tílias homenageia imigrantes de que país?", options: ["Pomerânia", "Áustria", "Suíça"], answer: 1, exp: "O Tirol é uma região histórica alpina que abrange áreas da Áustria e da Itália." },
+            { cat: "NOMES DE FESTAS", q: "Em Woche der deutschen Sprache, o que significa Sprache?", options: ["Comida", "Dança", "Língua ou idioma"], answer: 2, exp: "Sprache = língua/idioma." },
+            { cat: "GLOSSÁRIO", q: "Qual palavra alemã significa traje típico?", options: ["die Tracht", "die Bühne", "die Brezel"], answer: 0, exp: "Tracht = traje típico." },
+            { cat: "GLOSSÁRIO", q: "Qual é o nome alemão da calça tradicional de couro?", options: ["das Dirndl", "die Lederhose", "der Trachtenhut"], answer: 1, exp: "Lederhose = calça tradicional de couro." },
+            { cat: "GLOSSÁRIO", q: "Qual termo alemão designa o vestido feminino alpino?", options: ["der Umzug", "das Volksfest", "das Dirndl"], answer: 2, exp: "Dirndl = vestido feminino alpino." },
+            { cat: "GLOSSÁRIO", q: "Como se diz desfile em alemão?", options: ["der Umzug", "das Museum", "der Preis"], answer: 0, exp: "Umzug = desfile." },
+            { cat: "GLOSSÁRIO", q: "Qual palavra significa banda de sopro?", options: ["der Chor", "die Blaskapelle", "die Bühne"], answer: 1, exp: "Blaskapelle = banda de sopro." },
+            { cat: "GLOSSÁRIO", q: "Como se diz palco em alemão?", options: ["die Band", "die Zither", "die Bühne"], answer: 2, exp: "Bühne = palco." },
+            { cat: "GLOSSÁRIO", q: "Qual verbo alemão significa cantar?", options: ["singen", "kaufen", "tanzen"], answer: 0, exp: "singen = cantar." },
+            { cat: "GLOSSÁRIO", q: "Qual palavra alemã significa dança folclórica?", options: ["das Konzert", "der Volkstanz", "das Theater"], answer: 1, exp: "Volkstanz = dança folclórica." },
+            { cat: "GLOSSÁRIO", q: "O que significa Brezel no glossário?", options: ["Bolo", "Queijo cozido", "Pretzel"], answer: 2, exp: "Brezel = pretzel." },
+            { cat: "GLOSSÁRIO", q: "Qual palavra alemã significa chucrute?", options: ["das Sauerkraut", "der Kuchen", "der Wein"], answer: 0, exp: "Sauerkraut = chucrute." },
+            { cat: "GLOSSÁRIO", q: "Como se diz suco de maçã em alemão?", options: ["das Bier", "der Apfelsaft", "die Schokolade"], answer: 1, exp: "Apfelsaft = suco de maçã." },
+            { cat: "GLOSSÁRIO", q: "Qual palavra alemã significa cardápio?", options: ["die Eintrittskarte", "die Ausstellung", "die Speisekarte"], answer: 2, exp: "Speisekarte = cardápio." },
+            { cat: "GLOSSÁRIO", q: "Qual termo significa barraca ou estande de feira?", options: ["der Stand", "der Kunde", "der Preis"], answer: 0, exp: "Stand = barraca/estande." },
+            { cat: "GLOSSÁRIO", q: "Como se diz ingresso em alemão?", options: ["das Geschenk", "die Eintrittskarte", "die Schlange"], answer: 1, exp: "Eintrittskarte = ingresso." },
+            { cat: "GLOSSÁRIO", q: "Qual palavra alemã significa exposição?", options: ["die Untertitel", "das Konzert", "die Ausstellung"], answer: 2, exp: "Ausstellung = exposição." },
+            { cat: "GEOGRAFIA", q: "Segundo o Mapa, quantas festas e eventos foram catalogados?", options: ["35", "53", "73"], answer: 1, exp: "O Mapa contabiliza 53 festas e eventos." },
+            { cat: "GEOGRAFIA", q: "Segundo o Mapa, qual estado tem mais festas e eventos?", options: ["Rio Grande do Sul", "Santa Catarina", "São Paulo"], answer: 0, exp: "RS tem 14; SC, 13; SP, 7." },
+            { cat: "GEOGRAFIA", q: "Quantos eventos foram catalogados no Rio Grande do Sul?", options: ["12", "13", "14"], answer: 2, exp: "A tabela do RS tem 14 entradas." },
+            { cat: "GEOGRAFIA", q: "Quantos eventos foram catalogados em Santa Catarina?", options: ["13", "7", "4"], answer: 0, exp: "Santa Catarina tem 13 entradas." },
+            { cat: "GEOGRAFIA", q: "Em qual estado o levantamento NÃO catalogou evento?", options: ["Rondônia", "Roraima", "Ceará"], answer: 1, exp: "O Mapa não registra eventos em Roraima." },
+            { cat: "GEOGRAFIA", q: "Em qual cidade acontece a Bauernfest?", options: ["Blumenau", "Gramado", "Petrópolis"], answer: 2, exp: "Bauernfest: Petrópolis (RJ)." },
+            { cat: "GEOGRAFIA", q: "Em qual estado acontece a Pomerfest de Espigão d’Oeste?", options: ["Rondônia", "Roraima", "Paraná"], answer: 0, exp: "Espigão d’Oeste fica em Rondônia." },
+            { cat: "GEOGRAFIA", q: "A Tirolerfest é realizada em qual cidade catarinense?", options: ["Pomerode", "Treze Tílias", "Brusque"], answer: 1, exp: "Tirolerfest: Treze Tílias (SC)." },
+            { cat: "GEOGRAFIA", q: "A Pomitafro é realizada em qual município capixaba?", options: ["Domingos Martins", "Santa Leopoldina", "Vila Pavão"], answer: 2, exp: "Pomitafro: Vila Pavão (ES)." },
+            { cat: "GEOGRAFIA", q: "Quantos eventos o Mapa lista para o Rio de Janeiro?", options: ["4", "6", "9"], answer: 0, exp: "RJ: quatro eventos catalogados." },
+            { cat: "PAÍSES E IMIGRAÇÃO", q: "Em qual destes países o alemão NÃO é língua oficial?", options: ["Bélgica", "Andorra", "Alemanha"], answer: 1, exp: "Alemão é uma das três línguas oficiais da Bélgica." },
+            { cat: "PAÍSES E IMIGRAÇÃO", q: "Qual país é chamado Österreich em alemão?", options: ["Suíça", "Alemanha", "Áustria"], answer: 2, exp: "Österreich = Áustria." },
+            { cat: "PAÍSES E IMIGRAÇÃO", q: "Em que ano foi fundada a colônia de São Leopoldo (RS)?", options: ["1824", "1914", "2004"], answer: 0, exp: "São Leopoldo foi fundada em 1824, marco da imigração alemã." },
+            { cat: "PAÍSES E IMIGRAÇÃO", q: "Qual cidade fluminense recebeu imigrantes suíços desde 1819?", options: ["Petrópolis", "Nova Friburgo", "Niterói"], answer: 1, exp: "A imigração suíça em Nova Friburgo começou em 1819." },
+            { cat: "PAÍSES E IMIGRAÇÃO", q: "Hoje, a Pomerânia histórica fica principalmente em quais países?", options: ["Áustria e Suíça", "Bélgica e Luxemburgo", "Alemanha e Polônia"], answer: 2, exp: "A região histórica abrange áreas da Alemanha e da Polônia." },
+            { cat: "CURIOSIDADES", q: "Qual festa capixaba combina tradições pomerana, italiana e afro-brasileira?", options: ["Pomitafro", "Osterfest", "Kegelfest"], answer: 0, exp: "Pomitafro é realizada em Vila Pavão." },
+            { cat: "CURIOSIDADES", q: "Qual festa de Gramado reúne tradições alemãs, italianas e portuguesas?", options: ["Sommerfest", "Festa da Colônia", "Schützenfest"], answer: 1, exp: "A Festa da Colônia reúne as três tradições." },
+            { cat: "CURIOSIDADES", q: "Qual destes eventos do Rio de Janeiro é ligado à cultura suíça?", options: ["Bauernfest", "Festa Alemã no Catete", "Agosto Suíço"], answer: 2, exp: "Agosto Suíço: Nova Friburgo (RJ)." },
+            { cat: "CURIOSIDADES", q: "Qual museu carioca recebeu a Festa da Língua Alemã em maio de 2026?", options: ["Museu de Arte Moderna (MAM)", "Museu do Amanhã", "Museu Nacional"], answer: 0, exp: "A festa aconteceu no MAM em 30/05/2026." },
+            { cat: "CURIOSIDADES", q: "No Mapa, qual festa catarinense tem última edição comprovada em 2014?", options: ["Osterfest", "Kegelfest", "Tirolerfest"], answer: 1, exp: "A nova Festa do Bolão é um evento diferente da Kegelfest." },
+            { cat: "GEOGRAFIA", q: "No Mapa, qual cidade cearense tem a Semana da Língua Alemã?", options: ["Sobral", "Fortaleza", "Juazeiro do Norte"], answer: 1, exp: "Fortaleza (CE): edição de 2026 registrada no Mapa." },
+            { cat: "NOMES DE FESTAS", q: "Na Semana da Língua Alemã de Fortaleza (CE), Woche significa o quê?", options: ["Semana", "Cidade", "Festa"], answer: 0, exp: "Woche = semana." },
+            { cat: "GEOGRAFIA", q: "No Mapa, onde ocorre a Semana da Língua Alemã no DF?", options: ["Taguatinga", "Ceilândia", "Brasília"], answer: 2, exp: "Brasília (DF): edição de 2026 registrada no Mapa." },
+            { cat: "GLOSSÁRIO", q: "No evento da Embaixada da Alemanha em Brasília, Tag der offenen Tür significa o quê?", options: ["Dia da Unidade Alemã", "Dia de Portas Abertas", "Dia da Imigração"], answer: 1, exp: "Tag der offenen Tür = Dia de Portas Abertas." },
+            { cat: "GEOGRAFIA", q: "No Mapa, em qual cidade mineira acontece a Deutsches Fest?", options: ["Juiz de Fora", "Belo Horizonte", "Ouro Preto"], answer: 0, exp: "Deutsches Fest: bairro Borboleta, Juiz de Fora (MG)." },
+            { cat: "GEOGRAFIA", q: "Em qual bairro de Juiz de Fora (MG) acontece a Deutsches Fest?", options: ["Brooklin", "Parelheiros", "Borboleta"], answer: 2, exp: "A festa acontece no bairro Borboleta." },
+            { cat: "GEOGRAFIA", q: "Segundo o Mapa, quantas festas e eventos foram catalogados no Paraná?", options: ["3", "4", "6"], answer: 1, exp: "São quatro eventos catalogados no Paraná." },
+            { cat: "GEOGRAFIA", q: "No Mapa, qual cidade paranaense tem duas Oktoberfest distintas?", options: ["Rolândia", "Pato Bragado", "Marechal Cândido Rondon"], answer: 0, exp: "Rolândia: festa tradicional e evento da ACIR." }
+        ];
+
+        let selectedQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userName = "";
+        let userProfile = "";
+
+        window.setProfile = function(profile) {
+            userProfile = profile;
+            document.querySelectorAll('.profile-btn').forEach(btn => {
+                btn.classList.remove('border-amber-400', 'bg-amber-400/10', 'text-amber-300');
+            });
+            if(profile === 'Aluno CLAC') {
+                document.getElementById('btn-clac').classList.add('border-amber-400', 'bg-amber-400/10', 'text-amber-300');
+            } else {
+                document.getElementById('btn-visitor').classList.add('border-amber-400', 'bg-amber-400/10', 'text-amber-300');
+            }
+        }
+
+        window.startQuiz = function() {
+            userName = document.getElementById('user-name').value.trim();
+            if(!userName) {
+                alert('Por favor, digite seu nome ou apelido!');
+                return;
+            }
+            if(!userProfile) {
+                alert('Por favor, selecione se você é Aluno do CLAC ou Visitante!');
+                return;
+            }
+
+            // Sorteia aleatoriamente 10 perguntas do banco total de 58
+            const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+            selectedQuestions = shuffled.slice(0, 10);
+
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            document.getElementById('screen-welcome').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = selectedQuestions[currentQuestionIndex];
+            document.getElementById('question-counter').innerText = `Pergunta ${currentQuestionIndex + 1} de 10`;
+            document.getElementById('question-category').innerText = q.cat;
+            document.getElementById('question-text').innerText = q.q;
+            document.getElementById('current-score').innerText = score;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            document.getElementById('next-btn').classList.add('hidden');
+            const expBox = document.getElementById('explanation-box');
+            expBox.classList.add('hidden');
+            expBox.innerText = "";
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left bg-slate-950/80 border border-slate-700 hover:border-amber-400 p-4 rounded-xl text-slate-200 transition font-medium text-sm md:text-base";
+                btn.innerText = opt;
+                btn.onclick = () => selectOption(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectOption(selectedIndex, selectedBtn) {
+            const q = selectedQuestions[currentQuestionIndex];
+            const buttons = document.getElementById('options-container').children;
+
+            for(let btn of buttons) {
+                btn.disabled = true;
+                btn.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+
+            if(selectedIndex === q.answer) {
+                selectedBtn.classList.remove('border-slate-700', 'bg-slate-950/80');
+                selectedBtn.classList.add('border-emerald-500', 'bg-emerald-500/20', 'text-emerald-300');
+                score++;
+            } else {
+                selectedBtn.classList.remove('border-slate-700', 'bg-slate-950/80');
+                selectedBtn.classList.add('border-rose-500', 'bg-rose-500/20', 'text-rose-300');
+                buttons[q.answer].classList.remove('border-slate-700', 'bg-slate-950/80');
+                buttons[q.answer].classList.add('border-emerald-500', 'bg-emerald-500/20', 'text-emerald-300');
+            }
+
+            const expBox = document.getElementById('explanation-box');
+            expBox.innerText = `💡 Explicação: ${q.exp}`;
+            expBox.classList.remove('hidden');
+
+            document.getElementById('current-score').innerText = score;
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        window.nextQuestion = function() {
+            currentQuestionIndex++;
+            if(currentQuestionIndex < selectedQuestions.length) {
+                loadQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        async function finishQuiz() {
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            const percentage = Math.round((score / 10) * 100);
+            document.getElementById('result-name').innerText = `Parabéns, ${userName}!`;
+            document.getElementById('result-percentage').innerText = `${percentage}%`;
+            document.getElementById('result-details').innerText = `Você acertou ${score} de 10 perguntas sorteadas.`;
+
+            // Salvar no Firebase Firestore (usando a coleção padrão do ranking)
+            try {
+                await addDoc(collection(db, "ranking_cultura_alema"), {
+                    name: userName,
+                    profile: userProfile,
+                    score: score,
+                    percentage: percentage,
+                    createdAt: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Erro ao salvar no Firebase: ", error);
+            }
+        }
+
+        window.showRanking = async function() {
+            document.getElementById('screen-welcome').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-ranking').classList.remove('hidden');
+
+            const tbody = document.getElementById('ranking-table-body');
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400">Carregando ranking global...</td></tr>`;
+
+            try {
+                const q = query(collection(db, "ranking_cultura_alema"), orderBy("score", "desc"), limit(50));
+                const querySnapshot = await getDocs(q);
+
+                tbody.innerHTML = '';
+                if(querySnapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400">Nenhum resultado registrado ainda. Seja o primeiro!</td></tr>`;
+                    return;
+                }
+
+                let index = 1;
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-800/30 transition";
+                    tr.innerHTML = `
+                        <td class="py-3 px-3 font-bold text-amber-400">#${index++}</td>
+                        <td class="py-3 px-3 font-medium text-white">${escapeHtml(data.name || 'Anônimo')}</td>
+                        <td class="py-3 px-3"><span class="text-xs px-2.5 py-1 rounded-full ${data.profile === 'Aluno CLAC' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : 'bg-slate-800 text-slate-300'}">${data.profile || 'Visitante'}</span></td>
+                        <td class="py-3 px-3 text-right font-bold text-emerald-400">${data.score}/10 (${data.percentage || (data.score * 10)}%)</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Erro ao buscar ranking: ", error);
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-rose-400">Erro ao carregar o ranking. Verifique as regras de segurança do Firestore.</td></tr>`;
+            }
+        }
+
+        window.backToWelcome = function() {
+            document.getElementById('screen-ranking').classList.add('hidden');
+            document.getElementById('screen-welcome').classList.remove('hidden');
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
